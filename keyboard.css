@@ -1,0 +1,99 @@
+body {
+	height:100%;
+	min-height:100%;
+}
+#content {
+	margin:1rem;
+	text-align:center;
+}
+xfooter {
+	position:relative;
+	height:2rem;
+	margin-top:-2rem;
+	width:100%;
+}
+
+#keypad {
+	position:relative;
+	display:inline-block;
+}
+#keypad td.key {
+	border:1px solid fuchsia;
+	text-align:center;
+	cursor:pointer;
+	white-space:nowrap;
+	width:3rem;
+}
+#keypad td.key div.translit {
+	text-align:left;
+	padding-left:2px;
+}
+#keypad #td_dipthong {
+	border:0px;
+	margin:0px;
+	padding:1.45em 0px;
+}
+
+#keypad #table_dipthong {
+	margin:0px;
+	padding:0px;
+}
+#keypad td.noborder,
+#keypad tr.noborder,
+#keypad table.sub {
+	border:0px;
+	margin:0px;
+	padding:0px;
+}
+#keypad table.sub {
+	width:100%;
+}
+#keypad td.spacer {
+	border:0px;
+	margin:0px;
+	padding:0px;
+	height:1.45em 0px;
+}
+
+fieldset {
+	float:left;
+}
+fieldset label {
+	display:block;
+}
+
+#keypad .typingwindow {
+	width:100%;
+	height:3rem;
+	padding:0px .2rem;
+	margin:.5rem 0;
+}
+#keypad .devanagari {
+	font-size: 1.5em;
+}
+#keypad input[type=textarea].translit {
+	font-size: 1em;
+}
+
+#keypad .hog {
+	width:50%;
+}
+#keypad #clear {
+	margin:0px 10px;
+}
+#keypad td.hdr {
+	font-size:.8em;
+	color: blue;
+	cursor: pointer;
+	text-decoration: underline;
+	text-align:center;
+}
+#keypad .red {
+	background-color:pink;
+}
+#keypad_settings {
+	position:absolute;
+	right:0px;
+	top:0px;
+	background-color:white;
+}

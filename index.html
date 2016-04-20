@@ -1,0 +1,50 @@
+<html>
+	<head>
+		<meta http-equiv=Content-Type content='text/html; charset=UTF-8'>
+		<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'>
+		<title>Sanskrit Keyboard</title>
+		<style>[hidden] {display:none ! important;}</style>
+
+		<!-- submodules -->
+		<link  href='normalize.css/normalize.css' rel='stylesheet' type='text/css'></link>
+		<link  href='minimal/minimal.css' rel='stylesheet' type='text/css'></link>
+		<script src='minimal/minimal.js'></script>
+		<link  href='icon/icon.css' rel='stylesheet' type='text/css'></link>
+		<script src='icon/icon.js'></script>
+		<script src='icon/lib/menu.js'></script>
+		<script src='jslib/utils.js'></script>
+		<script src='jslib/dragger.js'></script>
+
+		<!-- app -->
+		<link  href='keyboard.css' rel='stylesheet' type='text/css'></link>
+		<script src='keyboard.js'></script>
+		
+		<script>
+		</script>
+
+	</head>
+	<body>
+		<header class='fixed'>
+			<hdr>
+				<icon type='draw' name='menu' class='bit' open='leftname-menu'></icon>
+				<span id='hdrtitle' style='vertical-align:middle'>Sanskrit Keyboard</span>
+			</hdr>
+		</header>
+
+		<section id='content'></section>
+
+		<footer>
+			<a class='ftr'>Om Shanti</a>
+			<a class='ftr' href='https://github.com/hagstrand/sanskrit'>source on github</a>
+		</footer>
+
+		<!---- modeless dialogs ----------------------------------------->
+		<nav initially hidden class='panel popup leftnav blu' id='leftname-menu'>
+			<div close='leftname-menu' class='closex'>&times;</div>
+			<p><input id=showtypewriter type=checkbox checked> <label for='showtypewriter'>Show Typewriter</label></p>
+			<p><input id=showanalytics type=checkbox> <label for='showanalytics'>Show Analytics</label></p>
+			<p><input id=showtranslit type=checkbox checked> <label for='showtranslit'>Show Transliteration</label></p>
+		</nav>
+		
+	</body>
+</html>	
