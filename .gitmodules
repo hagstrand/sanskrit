@@ -7,3 +7,6 @@
 [submodule "minimal"]
 	path = minimal
 	url = https://github.com/hagstrand/minimal
+[submodule "normalize.css"]
+	path = normalize.css
+	url = https://github.com/necolas/normalize.css
