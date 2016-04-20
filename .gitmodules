@@ -1,0 +1,9 @@
+[submodule "icon"]
+	path = icon
+	url = https://github.com/hagstrand/icon.git
+[submodule "jslib"]
+	path = jslib
+	url = https://github.com/hagstrand/jslib
+[submodule "minimal"]
+	path = minimal
+	url = https://github.com/hagstrand/minimal
