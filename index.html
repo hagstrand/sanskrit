@@ -24,7 +24,7 @@
 
 	</head>
 	<body>
-		<header class='fixed'>
+		<header class='xfixed'>
 			<hdr>
 				<icon type='draw' name='menu' class='bit' open='leftname-menu'></icon>
 				<span id='hdrtitle' style='vertical-align:middle'>Sanskrit Keyboard</span>
@@ -41,9 +41,11 @@
 		<!---- modeless dialogs ----------------------------------------->
 		<nav initially hidden class='panel popup leftnav blu' id='leftname-menu'>
 			<div close='leftname-menu' class='closex'>&times;</div>
-			<p><input id=showtypewriter type=checkbox checked> <label for='showtypewriter'>Show Typewriter</label></p>
-			<p><input id=showanalytics type=checkbox> <label for='showanalytics'>Show Analytics</label></p>
-			<p><input id=showtranslit type=checkbox checked> <label for='showtranslit'>Show Transliteration</label></p>
+			<h3>Settings</h3>
+			<p><input close='leftname-menu' id=showtypewriter type=radio name=mode checked> <label for='showtypewriter'>Typewriter</label></p>
+			<p><input close='leftname-menu' id=showanalytics type=radio name=mode> <label for='showanalytics'>Learning</label></p>
+			<hr/>
+			<p><input close='leftname-menu' id=showtranslit type=checkbox checked> <label for='showtranslit'>Show Transliteration</label></p>
 		</nav>
 		
 	</body>

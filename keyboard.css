@@ -1,16 +1,13 @@
-body {
-	height:100%;
-	min-height:100%;
-}
 #content {
 	margin:1rem;
 	text-align:center;
 }
-xfooter {
-	position:relative;
-	height:2rem;
-	margin-top:-2rem;
-	width:100%;
+#analytics fieldset, #analytics button {
+	margin:1rem;
+}
+
+table {
+	border-spacing:.3em;
 }
 
 #keypad {
@@ -18,7 +15,7 @@ xfooter {
 	display:inline-block;
 }
 #keypad td.key {
-	border:1px solid fuchsia;
+	border:1px solid #ccc;
 	text-align:center;
 	cursor:pointer;
 	white-space:nowrap;
@@ -27,6 +24,7 @@ xfooter {
 #keypad td.key div.translit {
 	text-align:left;
 	padding-left:2px;
+	margin-top:-.5em;
 }
 #keypad #td_dipthong {
 	border:0px;
@@ -53,6 +51,16 @@ xfooter {
 	margin:0px;
 	padding:0px;
 	height:1.45em 0px;
+}
+#keypad td.rowhdr {
+	border-top:1px solid navy;
+	border-left:1px solid navy;
+	border-bottom:1px solid navy;
+}
+#keypad td.hdr:not(.rowhdr):not(.pool) {
+	border-top:1px solid navy;
+	border-left:1px solid navy;
+	border-right:1px solid navy;
 }
 
 fieldset {
@@ -96,4 +104,20 @@ fieldset label {
 	right:0px;
 	top:0px;
 	background-color:white;
+}
+
+#analyticscontainer {
+	text-align:center;
+}
+table#analytics  {
+	margin:auto;
+}
+table#analytics  table {
+	width:100%;
+}
+table#analytics td, table#analytics  table td {
+	vertical-align:top;
+}
+table#lookslike td {
+	text-align:left !important;
 }

@@ -1,40 +1,15 @@
-﻿/*
-// this will make a call to a separate application
-bahasa.practice = function(event) {
-	var selector = '.key.selected';
-	var ra = document.querySelectorAll(selector);
-	var cards = [];
-	var r,o;
-	for (var i=0; i<ra.length; i++) {
-		r = ra[i];
-		o = {
-			i:parseInt(r.getAttribute('u')),
-			n:i,
-			q:r.querySelector('div:nth-child(1)').innerHTML,
-			t:r.querySelector('div:nth-child(2)').innerHTML,
-			a:r.querySelector('div:nth-child(2)').innerHTML,
-		};
-		cards.push(o);
-	}
-	var name = 'Sanskrit';		
-	var dir = 'qa';
-	flash.program.loadData(name, dir, cards);
-	flash.minimal.expand($('deskexpander'), $('deskcontainer'))
-};
-*/
-
-/**
+﻿/**
 	class Keyboard
 **/
 function Keyboard() {
 	this.rownames = ['', 'Gutteral', 'Palatal', 'Cerebral', 'Dental', 'Labial'];
 	this.buffer = [];  // array of keys to the alphabet table
-	this.config = {
-		showTypingWindow: true,
-		showAnalytics: false,
-		showTranslit: true,
-		translitUsingHypens: true,
-	}
+	this.typing = true;
+}
+
+Keyboard.configdefault = {	
+	mode: 'typewriter',  // typewriter or learning
+	showtranslit: 'on',  // on or off
 }
 
 Keyboard.prototype = {
@@ -43,13 +18,42 @@ Keyboard.prototype = {
 		container.innerHTML = s;
 		this.drawKeys();
 		this.attachDomEventHandlers();
-		this.enforceConfig();
+		this.initConfig();
 	},
 
-	enforceConfig: function() {
-		this.toggleTyping( this.config.showTypingWindow);
-		this.toggleAnalytics( this.config.showAnalytics);
-		this.toggleTranslit( this.config.showTranslit);
+	getConfig: function(name) {
+		var value = localStorage.getItem(name);
+		console.log(['localStorage get', name, value]);
+		if (!value) {   // (value === null)
+			value = Keyboard.configdefault[name];
+		}
+		return value;
+	},
+	setConfig: function(name, value) {
+		localStorage.setItem(name, value);
+		console.log(['localStorage set', name, value]);
+		if (name == 'mode') {
+			if (value == 'typewriter') {
+				keyboard.toggleAnalytics(false);
+				keyboard.toggleTyping(true);
+			} 
+			else if (value == 'learning') {
+				keyboard.toggleAnalytics(true);
+				keyboard.toggleTyping(false);
+			} 
+		}
+		else if (name == 'showtranslit') {
+			var b = (value == 'on') ? true : false;
+			this.toggleTranslit(b);
+		}
+		return value;
+	},
+	initConfig: function() {
+		var mode = this.setConfig( 'mode', this.getConfig('mode'));
+		var showtranslit = this.setConfig( 'showtranslit', this.getConfig('showtranslit'));
+		$('showtypewriter').checked = (mode == 'typewriter');
+		$('showanalytics').checked = (mode == 'learning');
+		$('showtranslit').checked = (showtranslit == 'on');
 	},
 
 	drawKeypad: function() {
@@ -69,36 +73,44 @@ Keyboard.prototype = {
 		}
 		sdigit += '</tr></table>';
 
+		// analytics subtable
 		sanal = '';
-		sanal += '<div id="analytics">';
-		sanal += '<fieldset>';
+		sanal += '<table id="analytics"><tr>';
+		sanal += '<td><fieldset>';
 		sanal += '<legend>Sounds Like</legend>';
-		sanal += '<label for="soundn" ><input id="soundn" type="checkbox" class="anchor" />N</label>';
-		sanal += '<label for="soundm" ><input id="soundm" type="checkbox" class="anchor" />M</label>';
-		sanal += '<label for="soundh" ><input id="soundh" type="checkbox" class="anchor" />H</label>';
-		sanal += '<label for="soundt" ><input id="soundt" type="checkbox" class="anchor" />T</label>';
-		sanal += '<label for="soundd" ><input id="soundd" type="checkbox" class="anchor" />D</label>';
-		sanal += '</fieldset>';
-		sanal += '<fieldset>';
+		sanal += '<table>';
+		sanal += '<tr><td><td class="hdr pool" tag="soundn">N</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="soundm">M</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="soundh">H</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="soundt">T</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="soundd">D</td></tr>';
+		sanal += '</table></fieldset></td>';
+		sanal += '<td><fieldset>';
 		sanal += '<legend>Looks Like</legend>';
-		sanal += '<label for="look3" ><input id="look3"  type="checkbox" class="anchor" />3</label>';
-		sanal += '<label for="lookb3"><input id="lookb3" type="checkbox" class="anchor" />backward 3</label>';
-		sanal += '<label for="looks" ><input id="looks"  type="checkbox" class="anchor" />S</label>';
-		sanal += '<label for="looko" ><input id="looko"  type="checkbox" class="anchor" />hangdown o</label>';
-		sanal += '<label for="look4" ><input id="look4"  type="checkbox" class="anchor" />4</label>';
-		sanal += '</fieldset>';
-		sanal += '<fieldset>';
+		sanal += '<table id="lookslike">';
+		sanal += '<tr><td><td class="hdr pool" tag="look3" >3</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="lookb3">backward 3</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="looks" >S</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="looko" >hangdown o</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="look4" >4</td></tr>';
+		sanal += '</table></fieldset></td>';
+		sanal += '<td><fieldset>';
 		sanal += '<legend>Roof</legend>';
-		sanal += '<label for="halfroof"><input id="halfroof" type="checkbox" class="anchor" />half</label>';
-		sanal += '<label for="fullroof"><input id="fullroof" type="checkbox" class="anchor" />full</label>';
-		sanal += '</fieldset>';
-		sanal += '<fieldset>';
+		sanal += '<table>';
+		sanal += '<tr><td><td class="hdr pool" tag="halfroof">half</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="fullroof">full</td></tr>';
+		sanal += '</table></fieldset></td>';
+		sanal += '<td><fieldset>';
 		sanal += '<legend>Frame</legend>';
-		sanal += '<label for="frameright" ><input id="frameright"  type="checkbox" />right</label>';
-		sanal += '<label for="framecenter"><input id="framecenter" type="checkbox" />center</label>';
-		sanal += '<label for="framenone"  ><input id="framenone"   type="checkbox" />none</label>';
-		sanal += '</fieldset>';
-		sanal += '</div>';
+		sanal += '<table>';
+		sanal += '<tr><td><td class="hdr pool" tag="frameright" >right</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="framecenter">center</td></tr>';
+		sanal += '<tr><td><td class="hdr pool" tag="framenone"  >none</td></tr>';
+		sanal += '</table></fieldset></td>';
+		sanal += '<td>';
+		sanal += '<button id="clearselection" >Clear Selection</button>';
+		sanal += '</td>';
+		sanal += '</table>';
 
 		// two vowel dipthong subtables
 		var sv = '<table id="dipthong_letter_subtable" class="sub">';
@@ -129,16 +141,16 @@ Keyboard.prototype = {
 		s += '<tr id="typing"><td colspan="16" class="noborder">' + skybd + '</td></tr>';
 
 		// first row: consonant, ending, vowel
-		s += '<tr class="colhdr"><td class="noborder"></td><td class="hdr" colspan="9">Consonant</td><td class="hdr" colspan="6">Vowel</td></tr>';
+		s += '<tr class="colhdrrow"><td class="noborder"></td><td class="hdr" colspan="9">Consonant</td><td class="hdr" colspan="6">Vowel</td></tr>';
 
 		// second row: soft/hard/short/long/dipthong
-		s += '<tr class="colhdr">';
+		s += '<tr class="colhdrrow">';
 		s += '<td class="noborder"></td><td class="hdr" colspan="2">Hard</td><td class="hdr" colspan="3">Soft</td><td class="hdr">Soft</td><td class="hdr">Hard</td><td class="hdr">Soft</td>';
 		s += '<td class="hdr">Ending</td><td class="hdr" colspan="2">Short</td><td class="hdr" colspan="2">Long</td><td class="hdr" colspan="2">Dipthong</td>';
 		s += '</tr>';
 
 		// third row: unaspirate/aspirate/letter/diacritic, embed subtables
-		s += '<tr class="colhdr">';
+		s += '<tr class="colhdrrow">';
 		s += '<td class="noborder"></td><td class="hdr">Unaspirate</td><td class="hdr">Aspirate</td><td class="hdr">Unaspirate</td><td class="hdr">Aspirate</td><td class="hdr">Nasal</td><td class="hdr" tag="semivowel">Semi-vowel</td><td class="hdr">Sibilant</td><td class="hdr">Aspirate</td>';
 		s += '<td class="hdr">Diacritic</td><td class="hdr">Letter</td><td class="hdr">Diacritic</td><td class="hdr">Letter</td><td class="hdr">Diacritic</td>';
 		s += '<td rowspan="6" id="dipthong_letter_hdr" class="noborder">' + sv + '</td><td rowspan="6" id="dipthong_diacritic_hdr" class="noborder">' + sd + '</td>';
@@ -167,23 +179,10 @@ Keyboard.prototype = {
 		s += '<tr id="digits"><td colspan="16" class="noborder">'+sdigit+'</td></tr>';
 
 		// analytics
-		s += '<tr id="analytics"><td colspan="16" class="noborder">'+sanal+'</td></tr>';
+		s += '<tr><td id="analyticscontainer" colspan="16" class="noborder">'+sanal+'</td></tr>';
 
 		// end big table
 		s += '</table>';
-
-		// settings dialog
-		s += '<div hidden id="keypad_settings" class="panel popup">';
-			s += '<p class=tright><icon name="xbox" hide="keypad_settings"></icon></p>';
-			s += '<p>';
-			s += 'Mode:';
-			s += '<button toggle="mode" id="modelearn" class="down">Learn</button>';
-			s += '<button toggle="mode" id="modetype">Type</button>';
-			s += '</p>';
-			s += '<p>';
-			s += '<label for="toggletranslit"><input type="checkbox" checked id="toggletranslit">Transliteration</label>';
-			s += '</p>';
-		s += '</div>';
 
 		s += '</div>';
 		return s;
@@ -244,7 +243,8 @@ Keyboard.prototype = {
 			e.addEventListener('click', function(event) {
 				var tag = event.target.id;
 				var boo = event.target.checked;
-				self.highTag( tag, boo);
+				self.highTag( event, tag, boo);
+				event.target.classList.toggle('selected', boo);
 			})
 		}
 
@@ -256,15 +256,22 @@ Keyboard.prototype = {
 			e.addEventListener('click', function(event) {
 				var tag = (event.target.getAttribute('tag')) ? event.target.getAttribute('tag') : event.target.innerHTML.toLowerCase();
 				var boo = !event.target.classList.contains('selected');
-				self.highTag( tag, boo);
-				event.target.classList.toggle('selected');
+				self.highTag( event, tag, boo);
+				event.target.classList.toggle('selected', boo);
 			}, false);
 		}
 
+		// clear typing button
 		$('clear').addEventListener('click', function(event) {
+			self.clearTyping();
 			$('tbs').value = '';
 			$('tbt').value = '';
 			self.buffer = [];
+		});
+
+		// clear selection button
+		$('clearselection').addEventListener('click', function(event) {
+			self.unhighAll();
 		});
 
 		window.addEventListener('keyup', function(event) {
@@ -279,7 +286,16 @@ Keyboard.prototype = {
 		}, false);
 	},
 
-	highTag: function(tag, boo) {
+	clearTyping: function() {
+		$('tbs').value = '';
+		$('tbt').value = '';
+		this.buffer = [];
+	},
+
+	highTag: function(event, tag, boo) {
+		if (!event.ctrlKey) {
+			this.unhighAll();
+		}
 		var to = bahasa.tags[tag];
 		for (var m in bahasa.alphabet) {
 			ao = bahasa.alphabet[m];
@@ -295,33 +311,44 @@ Keyboard.prototype = {
 		}
 	},
 
+	unhighAll: function(tag, boo) {
+		var keys = document.querySelectorAll('.selected');
+		for (var i=0; i<keys.length; i++) {
+			e = keys[i];
+			e.classList.remove('selected');
+		}
+	},
+
 	getId: function(a) {
 		return 'cell_'+a.r+'_'+a.c;
 	},
 
 	toggleTyping: function(force) {
-		this.config.showTypingWindow = (typeof(force) == 'undefined') ? !this.config.showTypingWindow : force;
-		toggleAttribute($('typing'), 'hidden', '', !this.config.showTypingWindow);
+		this.unhighAll();
+		this.clearTyping();
+		var b = force;
+		this.typing = b;
+		toggleAttribute($('typing'), 'hidden', '', !b);
 	},
 
 	toggleAnalytics: function(force) {
-		this.config.showAnalytics = (typeof(force) == 'undefined') ? !this.config.showAnalytics : force;
+		var b = force;
 
 		// column headers
-		var colhdrs = document.getElementsByClassName('colhdr');
-		for (var i=0; i<colhdrs.length; i++) {
-			e = colhdrs[i];
-			toggleAttribute(colhdrs[i], 'hidden', '', !this.config.showAnalytics);
+		var colhdrrows = document.getElementsByClassName('colhdrrow');
+		for (var i=0; i<colhdrrows.length; i++) {
+			e = colhdrrows[i];
+			toggleAttribute(colhdrrows[i], 'hidden', '', !b);
 		}
 
 		// row headers
 		var rowhdrs = document.getElementsByClassName('rowhdr');
 		for (var i=0; i<rowhdrs.length; i++) {
-			toggleAttribute(rowhdrs[i], 'hidden', '', !this.config.showAnalytics);
+			toggleAttribute(rowhdrs[i], 'hidden', '', !b);
 		}
 
 		// special handling of the dipthong columns
-		if (this.config.showAnalytics) {
+		if (b) {
 			$('dipthong_letter_hdr').appendChild($('dipthong_letter_subtable'));
 			$('dipthong_diacritic_hdr').appendChild($('dipthong_diacritic_subtable'));
 		}
@@ -329,16 +356,15 @@ Keyboard.prototype = {
 			$('dipthong_letter_container').appendChild($('dipthong_letter_subtable'));
 			$('dipthong_diacritic_container').appendChild($('dipthong_diacritic_subtable'));
 		}
-		toggleAttribute($('dipthong_letter_subhdr'), 'hidden', '', !this.config.showAnalytics);
-		toggleAttribute($('dipthong_diacritic_subhdr'), 'hidden', '', !this.config.showAnalytics);
+		toggleAttribute($('dipthong_letter_subhdr'), 'hidden', '', !b);
+		toggleAttribute($('dipthong_diacritic_subhdr'), 'hidden', '', !b);
 
 		// row of fieldsets
-		toggleAttribute($('analytics'), 'hidden', '', !this.config.showAnalytics);
+		toggleAttribute($('analytics'), 'hidden', '', !b);
 	},
 
 	toggleTranslit: function(force) {
-		this.config.showTranslit = (typeof(force) == 'undefined') ? !this.config.showTranslit : force;
-		var boo = this.config.showTranslit;
+		var boo = force;
 		var keys = document.querySelectorAll('div.translit');
 		for (var i=0; i<keys.length; i++) {
 			e = keys[i];
@@ -363,7 +389,7 @@ Keyboard.prototype = {
 		var e = event.target.parentElement;
 
 		// if in typing mode, add this char to the window
-		if (this.config.showTypingWindow) {
+		if (this.typing) {
 			var u = e.getAttribute('u');
 			if (!u) return;
 
@@ -382,6 +408,9 @@ Keyboard.prototype = {
 
 		// if NOT in typing mode, highlight the key
 		else {
+			if (!event.ctrlKey) {
+				this.unhighAll();
+			}
 			e.classList.toggle('selected');
 		}
 	},
@@ -456,6 +485,7 @@ Keyboard.prototype = {
 
 	setLanguage: function(lang) {
 		appendScript('alphabet/' + lang + '.js');
+		console.log('loading alphabet ' + lang);
 	},
 }
 
@@ -466,16 +496,44 @@ window.addEventListener('load', function(evt) {
 
 	// attach leftnav menu
 	$('showtypewriter').addEventListener('click', function(evt) {
-		keyboard.toggleTyping();
+		keyboard.setConfig('mode', 'typewriter');
 	}, false);
 	$('showanalytics').addEventListener('click', function(evt) {
-		keyboard.toggleAnalytics();
+		keyboard.setConfig('mode', 'learning');
 	}, false);
 	$('showtranslit').addEventListener('click', function(evt) {
-		keyboard.toggleTranslit();
+		keyboard.setConfig('showtranslit', (evt.currentTarget.checked ? 'on' : 'off'));
 	}, false);
 }, false);
 
-onScriptLoaded = function() {
+onAlphabetLoaded = function() {
+	console.log('alphabet loaded');
 	keyboard.setup($('content'));
 }
+
+
+/*
+// this will make a call to a separate application
+bahasa.practice = function(event) {
+	var selector = '.key.selected';
+	var ra = document.querySelectorAll(selector);
+	var cards = [];
+	var r,o;
+	for (var i=0; i<ra.length; i++) {
+		r = ra[i];
+		o = {
+			i:parseInt(r.getAttribute('u')),
+			n:i,
+			q:r.querySelector('div:nth-child(1)').innerHTML,
+			t:r.querySelector('div:nth-child(2)').innerHTML,
+			a:r.querySelector('div:nth-child(2)').innerHTML,
+		};
+		cards.push(o);
+	}
+	var name = 'Sanskrit';		
+	var dir = 'qa';
+	flash.program.loadData(name, dir, cards);
+	flash.minimal.expand($('deskexpander'), $('deskcontainer'))
+};
+*/
+

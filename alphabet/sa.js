@@ -240,4 +240,4 @@ bahasa.getTranslitFromString = function(s) {
 	return t;
 }
 
-onScriptLoaded();
+onAlphabetLoaded();
