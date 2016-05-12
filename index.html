@@ -5,22 +5,26 @@
 		<title>Sanskrit Keyboard</title>
 		<style>[hidden] {display:none ! important;}</style>
 
-		<!-- submodules -->
+<?php if (false) { ?>
+		<script>/** @const */ var voyc = {}; window['voyc'] = {};</script>
 		<link  href='normalize.css/normalize.css' rel='stylesheet' type='text/css'></link>
 		<link  href='minimal/minimal.css' rel='stylesheet' type='text/css'></link>
-		<script src='minimal/minimal.js'></script>
 		<link  href='icon/icon.css' rel='stylesheet' type='text/css'></link>
+		<link  href='keyboard.css' rel='stylesheet' type='text/css'></link>
+		<script src='minimal/minimal.js'></script>
 		<script src='icon/icon.js'></script>
 		<script src='icon/lib/menu.js'></script>
 		<script src='jslib/utils.js'></script>
 		<script src='jslib/dragger.js'></script>
-
-		<!-- app -->
-		<link  href='keyboard.css' rel='stylesheet' type='text/css'></link>
+		<script src='jslib/voyclogo.js'></script>
 		<script src='keyboard.js'></script>
+<?php } else { ?>
+<!--<remove>
+		<link  href='min.css' rel='stylesheet' type='text/css'></link>
+		<script src='min.js'></script>
+<remove>-->
+<?php } ?>
 		
-		<script>
-		</script>
 
 	</head>
 	<body>
@@ -34,8 +38,8 @@
 		<section id='content'></section>
 
 		<footer>
-			<a class='ftr'>Om Shanti</a>
-			<a class='ftr' href='https://github.com/hagstrand/sanskrit'>source on github</a>
+			<a class='ftr voyclogo' target='_blank' href='http://voyc.com'>voyc</a>
+			<a class='ftr' target='_blank' href='http://github.com/voyc/sanskrit'>github</a>
 		</footer>
 
 		<!---- modeless dialogs ----------------------------------------->

@@ -2,13 +2,13 @@
 	sanskrit alphabet
 */
 
-if (typeof(bahasa) == 'undefined') {
-	bahasa = {};
-}
+(function() {   // create a local scope
 
-bahasa.lang = 'sa'
+var alphabet = {};
 
-bahasa.alphabet = {
+alphabet.lang = 'sa'
+
+alphabet.alphabet = {
 //   index    db-id   unicode         translit filename            tags                           looks-like       sound   row/col   name
 	0x0966:	{ i:6536, u:0x0966, s:'०',	t:'0'  ,f:''    ,p:'d',b:' ',m:' ',h:' ',a:' ',e:' '  ,o:' ',v:' ',g:' ',  x:' '  ,r:6,c:10, n:''            },
 	0x0967:	{ i:6537, u:0x0967, s:'१',	t:'1'  ,f:''    ,p:'d',b:' ',m:' ',h:' ',a:' ',e:' '  ,o:' ',v:' ',g:' ',  x:' '  ,r:6,c: 1, n:''            },
@@ -88,7 +88,7 @@ bahasa.alphabet = {
 	0x0020: { i:0000, u:0x0020, s:' ',	t:' '  ,f:''    ,p:'s',b:' ',m:' ',h:' ',a:' ',e:' '  ,o:' ',v:' ',g:' ',  x:' '  ,r:6,c:11, n:'space'       },
 };
 
-bahasa.tags = {
+alphabet.tags = {
 	vowel:		{t:'p', v:'v', label:'Vowel'},
 	consonant:	{t:'p', v:'c', label:'Consonant'},
 	digit:		{t:'p', v:'d', label:'Digit'},
@@ -97,9 +97,12 @@ bahasa.tags = {
 	letter:		{t:'b', v:'l', label:'Letter'},
 	diacritic:	{t:'b', v:'d', label:'Diacritic'},  // "sign"
 
+/*	
 	after:		{t:'e', v:'e', label:'Ending'},  // consonant diacritics come after vowel sound
 	before:		{t:'e', v:'b', label:'Before'},  // consonant letters mostly used before
 	either:		{t:'e', v:'o', label:'Either'},  // some consonant letters can also be used after
+*/
+	ending:		{t:'e', v:'e', label:'Ending'},  // some consonant letters can also be used after
 
 	gutteral:	{t:'m', v:'g', label:'Gutteral'},
 	palatal:	{t:'m', v:'p', label:'Palatal'},
@@ -140,7 +143,7 @@ bahasa.tags = {
 	soundd:		{t:'x', v:'d', label:'Sounds like D'},
 }
 
-bahasa.empties = [
+alphabet.empties = [
 	{r:1,c: 6},
 	{r:1,c: 7},
 	{r:1,c:11},
@@ -153,91 +156,5 @@ bahasa.empties = [
 	{r:5,c: 8},
 ];
 
-
-/**
-	Are the following methods unique to the alphabet?
-	Or generic to all alphabets?
-	
-	buffer - an array of unicode index numbers
-	char - 
-	string - 
-	translit -
-**/
-
-bahasa.getUnicodeFromChar = function(c) {
-	return c.charCodeAt(0)
-}
-
-bahasa.getCharFromUnicode = function(u) {
-	return String.fromCharCode(u);
-}
-
-bahasa.getBufferFromString = function(s) {
-	var b = s.split(''); 
-	for (var i=0; i<b.length; i++) {
-		b[i] = bahasa.getUnicodeFromChar(b[i]);
-	}
-	return b;
-}
-
-bahasa.getStringFromBuffer = function(b) {
-	var a = [];
-	for (var i=0; i<b.length; i++) {
-		a[i] = bahasa.getCharFromUnicode(b[i]);
-	}
-	return a.join('');
-}
-
-bahasa.bufferContainsSpace = function(b) {
-	var r = false;
-	for (var i=0; i<b.length; i++) {
-		if (bahasa.alphabet[b[i]].n == 'space') {
-			r = true;
-			break;
-		}
-	}
-	return r;
-}
-
-bahasa.getTranslitFromBuffer = function(b) {
-	var comma = ',';
-	var hyphen = '-';
-	var tbt = '';
-	var u, a;  // current character
-	var un, an; // next character
-	var up, ap; // previous character
-	var hasSpace = bahasa.bufferContainsSpace(b);
-	for (var i=0; i<b.length; i++) {
-		u = b[i];
-		a = bahasa.alphabet[u];  // current character
-		un = (i<b.length-1) ? b[i+1] : null;
-		an = bahasa.alphabet[un];  // next character
-
-		// if current char is letter, and prev char is not space, this is beginning of syllable
-		tween = ((a.b == 'l' && ap && ap.b != ' '));
-
-		// translit: 
-		//    1. hypens between syllables, 
-		//    2. add 'a' to consonants with no following vowel diacritic
-		if (tween && !hasSpace) {  //} && this.config.translitUsingHypens) {
-			tbt += hyphen;
-		}
-		tbt += a.t;
-		//tbt += (a.p == 'c' && (!an || an.p != 'a')) ? 'a' : '';
-		if ((a.p == 'c' && a.b == 'l') && (!an || !(an.p == 'v' && an.b == 'd'))) {
-			tbt += 'a';
-		}
-
-		up = u;
-		ap = bahasa.alphabet[up];  // previous character 
-	}
-	return tbt;
-}
-
-bahasa.getTranslitFromString = function(s) {
-	var b = getBufferFromString(s);
-	var t = getTranslitFromBuffer(b);
-	return t;
-}
-
-onAlphabetLoaded();
+window.voyc.onAlphabetLoaded(alphabet);
+}());

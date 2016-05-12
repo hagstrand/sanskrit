@@ -1,18 +1,25 @@
 ﻿/**
-	class Keyboard
+	class Keyboard\
+	@constructor
 **/
-function Keyboard() {
+voyc.Keyboard = function() {
+	// is singleton
+	if (voyc.Keyboard._instance) return voyc.Keyboard._instance;
+	else voyc.Keyboard._instance = this;
+
 	this.rownames = ['', 'Gutteral', 'Palatal', 'Cerebral', 'Dental', 'Labial'];
 	this.buffer = [];  // array of keys to the alphabet table
 	this.typing = true;
+	this.alphabet = {};  // table will be loaded dynamically from ./alphabet/sa.js file
+	this.winFlash = null;
 }
 
-Keyboard.configdefault = {	
+voyc.Keyboard.configdefault = {	
 	mode: 'typewriter',  // typewriter or learning
 	showtranslit: 'on',  // on or off
 }
 
-Keyboard.prototype = {
+voyc.Keyboard.prototype = {
 	setup: function(container) {
 		var s = this.drawKeypad();
 		container.innerHTML = s;
@@ -23,23 +30,23 @@ Keyboard.prototype = {
 
 	getConfig: function(name) {
 		var value = localStorage.getItem(name);
-		console.log(['localStorage get', name, value]);
+		console.log('localStorage get ' + name + ': ' + value);
 		if (!value) {   // (value === null)
-			value = Keyboard.configdefault[name];
+			value = voyc.Keyboard.configdefault[name];
 		}
 		return value;
 	},
 	setConfig: function(name, value) {
 		localStorage.setItem(name, value);
-		console.log(['localStorage set', name, value]);
+		console.log('localStorage set ' + name + ': ' + value);
 		if (name == 'mode') {
 			if (value == 'typewriter') {
-				keyboard.toggleAnalytics(false);
-				keyboard.toggleTyping(true);
+				voyc.keyboard.toggleAnalytics(false);
+				voyc.keyboard.toggleTyping(true);
 			} 
 			else if (value == 'learning') {
-				keyboard.toggleAnalytics(true);
-				keyboard.toggleTyping(false);
+				voyc.keyboard.toggleAnalytics(true);
+				voyc.keyboard.toggleTyping(false);
 			} 
 		}
 		else if (name == 'showtranslit') {
@@ -51,9 +58,9 @@ Keyboard.prototype = {
 	initConfig: function() {
 		var mode = this.setConfig( 'mode', this.getConfig('mode'));
 		var showtranslit = this.setConfig( 'showtranslit', this.getConfig('showtranslit'));
-		$('showtypewriter').checked = (mode == 'typewriter');
-		$('showanalytics').checked = (mode == 'learning');
-		$('showtranslit').checked = (showtranslit == 'on');
+		voyc.$('showtypewriter').checked = (mode == 'typewriter');
+		voyc.$('showanalytics').checked = (mode == 'learning');
+		voyc.$('showtranslit').checked = (showtranslit == 'on');
 	},
 
 	drawKeypad: function() {
@@ -108,6 +115,7 @@ Keyboard.prototype = {
 		sanal += '<tr><td><td class="hdr pool" tag="framenone"  >none</td></tr>';
 		sanal += '</table></fieldset></td>';
 		sanal += '<td>';
+		sanal += '<button id="practice" >Practice</button>';
 		sanal += '<button id="clearselection" >Clear Selection</button>';
 		sanal += '</td>';
 		sanal += '</table>';
@@ -193,14 +201,14 @@ Keyboard.prototype = {
 		var cell = '';
 		var id = '';
 		var a;
-		for (var i in bahasa.alphabet) {
-			a = bahasa.alphabet[i];
+		for (var i in this.alphabet['alphabet']) {
+			a = this.alphabet['alphabet'][i];
 			id = this.getId(a);
-			if ($(id)) {
-				cell  = '<div class="devanagari">'+a.s+'</div>';
-				cell += '<div class="translit hidden">'+a.t+'</div>';
-				$(id).innerHTML = cell;
-				$(id).setAttribute('u', i);
+			if (voyc.$(id)) {
+				cell  = '<div class="devanagari">'+a['s']+'</div>';
+				cell += '<div class="translit hidden">'+a['t']+'</div>';
+				voyc.$(id).innerHTML = cell;
+				voyc.$(id).setAttribute('u', i);
 			}
 		}
 
@@ -208,26 +216,26 @@ Keyboard.prototype = {
 		id = 'cell_6_11';
 		cell  = '<div class="devanagari">space</div>';
 		cell += '<div class="translit hidden"></div>';
-		$(id).innerHTML = cell;
-		$(id).setAttribute('u', 0x0020);
+		voyc.$(id).innerHTML = cell;
+		voyc.$(id).setAttribute('u', 0x0020);
 
 		// hide the empty cells
-		for (var i=0; i<bahasa.empties.length; i++) {
-			var a = bahasa.empties[i];
+		for (var i=0; i<this.alphabet['empties'].length; i++) {
+			var a = this.alphabet['empties'][i];
 			var id = this.getId(a);
-			$(id).classList.add('noborder');
+			voyc.$(id).classList.add('noborder');
 		}
 	},
 
-	attachDomEventHandlers: function(row) {
+	attachDomEventHandlers: function() {
 		var self = this;
 
 		// keys
 		var a, e;
-		for (var i in bahasa.alphabet) {
-			a = bahasa.alphabet[i];
+		for (var i in this.alphabet['alphabet']) {
+			a = this.alphabet['alphabet'][i];
 			id = this.getId(a);
-			e = $(id);
+			e = voyc.$(id);
 			if (e) {
 				e.addEventListener('click', function(event) {
 					self.onkey(event);
@@ -262,16 +270,21 @@ Keyboard.prototype = {
 		}
 
 		// clear typing button
-		$('clear').addEventListener('click', function(event) {
+		voyc.$('clear').addEventListener('click', function(event) {
 			self.clearTyping();
-			$('tbs').value = '';
-			$('tbt').value = '';
+			voyc.$('tbs').value = '';
+			voyc.$('tbt').value = '';
 			self.buffer = [];
 		});
 
 		// clear selection button
-		$('clearselection').addEventListener('click', function(event) {
+		voyc.$('clearselection').addEventListener('click', function(event) {
 			self.unhighAll();
+		});
+
+		// practice button
+		voyc.$('practice').addEventListener('click', function(event) {
+			self.practice(event);
 		});
 
 		window.addEventListener('keyup', function(event) {
@@ -281,14 +294,14 @@ Keyboard.prototype = {
 		    }
 		});
 
-		$('tbs').addEventListener('input', function(event) {
+		voyc.$('tbs').addEventListener('input', function(event) {
 			self.oninput(event);
 		}, false);
 	},
 
 	clearTyping: function() {
-		$('tbs').value = '';
-		$('tbt').value = '';
+		voyc.$('tbs').value = '';
+		voyc.$('tbt').value = '';
 		this.buffer = [];
 	},
 
@@ -296,22 +309,22 @@ Keyboard.prototype = {
 		if (!event.ctrlKey) {
 			this.unhighAll();
 		}
-		var to = bahasa.tags[tag];
-		for (var m in bahasa.alphabet) {
-			ao = bahasa.alphabet[m];
-			if (ao[to.t] == to.v) {
+		var to = this.alphabet['tags'][tag];
+		for (var m in this.alphabet['alphabet']) {
+			ao = this.alphabet['alphabet'][m];
+			if (ao[to['t']] == to['v']) {
 				id = this.getId(ao);
 				if (boo) {
-					$(id).classList.add('selected');
+					voyc.$(id).classList.add('selected');
 				}
 				else {
-					$(id).classList.remove('selected');
+					voyc.$(id).classList.remove('selected');
 				}
 			}
 		}
 	},
 
-	unhighAll: function(tag, boo) {
+	unhighAll: function() {
 		var keys = document.querySelectorAll('.selected');
 		for (var i=0; i<keys.length; i++) {
 			e = keys[i];
@@ -320,7 +333,7 @@ Keyboard.prototype = {
 	},
 
 	getId: function(a) {
-		return 'cell_'+a.r+'_'+a.c;
+		return 'cell_'+a['r']+'_'+a['c'];
 	},
 
 	toggleTyping: function(force) {
@@ -328,7 +341,7 @@ Keyboard.prototype = {
 		this.clearTyping();
 		var b = force;
 		this.typing = b;
-		toggleAttribute($('typing'), 'hidden', '', !b);
+		voyc.toggleAttribute(voyc.$('typing'), 'hidden', '', !b);
 	},
 
 	toggleAnalytics: function(force) {
@@ -338,29 +351,29 @@ Keyboard.prototype = {
 		var colhdrrows = document.getElementsByClassName('colhdrrow');
 		for (var i=0; i<colhdrrows.length; i++) {
 			e = colhdrrows[i];
-			toggleAttribute(colhdrrows[i], 'hidden', '', !b);
+			voyc.toggleAttribute(colhdrrows[i], 'hidden', '', !b);
 		}
 
 		// row headers
 		var rowhdrs = document.getElementsByClassName('rowhdr');
 		for (var i=0; i<rowhdrs.length; i++) {
-			toggleAttribute(rowhdrs[i], 'hidden', '', !b);
+			voyc.toggleAttribute(rowhdrs[i], 'hidden', '', !b);
 		}
 
 		// special handling of the dipthong columns
 		if (b) {
-			$('dipthong_letter_hdr').appendChild($('dipthong_letter_subtable'));
-			$('dipthong_diacritic_hdr').appendChild($('dipthong_diacritic_subtable'));
+			voyc.$('dipthong_letter_hdr').appendChild(voyc.$('dipthong_letter_subtable'));
+			voyc.$('dipthong_diacritic_hdr').appendChild(voyc.$('dipthong_diacritic_subtable'));
 		}
 		else {
-			$('dipthong_letter_container').appendChild($('dipthong_letter_subtable'));
-			$('dipthong_diacritic_container').appendChild($('dipthong_diacritic_subtable'));
+			voyc.$('dipthong_letter_container').appendChild(voyc.$('dipthong_letter_subtable'));
+			voyc.$('dipthong_diacritic_container').appendChild(voyc.$('dipthong_diacritic_subtable'));
 		}
-		toggleAttribute($('dipthong_letter_subhdr'), 'hidden', '', !b);
-		toggleAttribute($('dipthong_diacritic_subhdr'), 'hidden', '', !b);
+		voyc.toggleAttribute(voyc.$('dipthong_letter_subhdr'), 'hidden', '', !b);
+		voyc.toggleAttribute(voyc.$('dipthong_diacritic_subhdr'), 'hidden', '', !b);
 
 		// row of fieldsets
-		toggleAttribute($('analytics'), 'hidden', '', !b);
+		voyc.toggleAttribute(voyc.$('analytics'), 'hidden', '', !b);
 	},
 
 	toggleTranslit: function(force) {
@@ -379,8 +392,8 @@ Keyboard.prototype = {
 
 	// user has typed on the real keyboard
 	oninput: function(event) {
-		var s = $('tbs').value;
-		this.buffer = bahasa.getBufferFromString(s);
+		var s = voyc.$('tbs').value;
+		this.buffer = this.getBufferFromString(s);
 		this.redrawTypingWindows(event);
 	},
 
@@ -394,14 +407,14 @@ Keyboard.prototype = {
 			if (!u) return;
 
 			// insert the character at the caret position in textarea and buffer
-			var selStart = $('tbs').selectionStart;
-			var selEnd = $('tbs').selectionEnd;
+			var selStart = voyc.$('tbs').selectionStart;
+			var selEnd = voyc.$('tbs').selectionEnd;
 			var out = selEnd - selStart;
-			this.buffer.splice(selStart, out, parseInt(u));
-			var s = bahasa.getStringFromBuffer(this.buffer);
-			$('tbs').value = s;
-			$('tbs').selectionStart = $('tbs').selectionEnd = (selStart + 1);
-			$('tbs').focus();
+			this.buffer.splice(selStart, out, parseInt(u,10));
+			var s = this.getStringFromBuffer(this.buffer);
+			voyc.$('tbs').value = s;
+			voyc.$('tbs').selectionStart = voyc.$('tbs').selectionEnd = (selStart + 1);
+			voyc.$('tbs').focus();
 
 			this.redrawTypingWindows(event);
 		}
@@ -416,15 +429,15 @@ Keyboard.prototype = {
 	},
 
 	redrawTypingWindows: function(event) {
-		//$('tbt').value = this.buffer;
-		//$('tbt').value = bahasa.getStringFromBuffer(this.buffer);
-		$('tbt').value = bahasa.getTranslitFromBuffer(this.buffer);
+		//voyc.$('tbt').value = this.buffer;
+		//voyc.$('tbt').value = this.getStringFromBuffer(this.buffer);
+		voyc.$('tbt').value = this.getTranslitFromBuffer(this.buffer);
 	},
 
 	promptDeveloper: function() {
 		// redraw the four display strings
-		var tbs = $('tbs').value;  // sanskrit
-		var tbt = $('tbt').value;  // translit
+		var tbs = voyc.$('tbs').value;  // sanskrit
+		var tbt = voyc.$('tbt').value;  // translit
 		var tbc = '';  // components
 		var tbu = '';  // unicode
 		var numComponents = 1;
@@ -437,24 +450,24 @@ Keyboard.prototype = {
 		var un, an; // next character
 		var up, ap; // previous character
 		var tween = false;
-		var hasSpace = bahasa.bufferContainsSpace(this.buffer);
+		var hasSpace = this.bufferContainsSpace(this.buffer);
 		for (var i=0; i<len; i++) {
 			u = this.buffer[i];
-			a = bahasa.alphabet[u];  // current charcter
+			a = this.alphabet['alphabet'][u];  // current charcter
 			un = (i<len-1) ? this.buffer[i+1] : null;
-			an = bahasa.alphabet[un];  // next character
+			an = this.alphabet['alphabet'][un];  // next character
 
 			// if current char is letter, and prev char is not space, this is beginning of syllable
-			tween = ((a.b == 'l' && ap && ap.b != ' '));
+			tween = ((a['b'] == 'l' && ap && ap['b'] != ' '));
 
 			// components: syllables separated by commas, or words separated by spaces
 			if (hasSpace) {
-				if (a.s == ' ') {
+				if (a['s'] == ' ') {
 					tbc += comma;
 					numComponents++;
 				}
 				else {
-					tbc += a.s;
+					tbc += a['s'];
 				}
 			}
 			else {
@@ -462,78 +475,204 @@ Keyboard.prototype = {
 					tbc += comma;
 					numComponents++;
 				}
-				tbc += a.s;
+				tbc += a['s'];
 			}
 
 			// unicode: symbols separated by commas
 			if (tbu) {
 				tbu += comma;
 			}
-			tbu += a.u;
+			tbu += a['u'];
 
 			up = u;
-			ap = bahasa.alphabet[up];  // previous character
+			ap = this.alphabet['alphabet'][up];  // previous character
 		}
 
 		var s = "insert into flash.quest (q, a, components, numcomponents) values ('$1', '$2', '$3', $4)";
 		s = s.replace('$1', tbs);
 		s = s.replace('$2', tbt);
 		s = s.replace('$3', tbc);
-		s = s.replace('$4', numComponents);
+		s = s.replace('$4', numComponents.toString());
 		prompt('',s);
 	},
 
 	setLanguage: function(lang) {
-		appendScript('alphabet/' + lang + '.js');
+		voyc.appendScript('alphabet/' + lang + '.js');
 		console.log('loading alphabet ' + lang);
+	},
+	
+	practice: function(evt) {
+		// build an array of selected cards, or all cards
+		var selector = '.key.selected';
+		var ra = document.querySelectorAll(selector);
+		var cards = [];
+		var r,o;
+		if (ra.length) {
+			for (var i=0; i<ra.length; i++) {
+				r = ra[i];
+				o = {
+					i:parseInt(r.getAttribute('u'),10),
+					n:i+1,
+					q:r.querySelector('div:nth-child(1)').innerHTML,
+					t:r.querySelector('div:nth-child(1)').innerHTML,
+					a:r.querySelector('div:nth-child(2)').innerHTML,
+				};
+				cards.push(o);
+			}
+		}
+		else {
+			var seq = 1;
+			for (key in this.alphabet['alphabet']) {
+				r = this.alphabet['alphabet'][key];
+				if (r['t'] && r['t'] != ' ') {
+					o = {
+						i:r['i'],
+						n:seq++,
+						q:r['s'],
+						t:r['t'],
+						a:r['t'],
+					};
+					cards.push(o);
+				}
+			}
+		}
+		
+		// build data structure including array of cards
+		window.data = {
+			name: 'Sanskrit Alphabet',
+			reversible:true,
+			language:true,
+			sketch:true,
+			translit:false,
+			audio:false,
+			db: false,
+			hm: false, // show translit with question or answer
+			cards: cards,
+		}
+
+		// open the Flash window
+		var url = 'http://flash.voyc.com';
+		if (window.location.href.indexOf('file:') > -1) {
+			url = '../flash/index.html'; // local testing
+		}
+		if (this.winFlash && !this.winFlash.closed) {
+			console.log('Flash already open');
+			this.winFlash.focus();
+		}
+		else {
+			console.log('opening Flash');
+			this.winFlash = window.open(url, 'flash');
+		}
+		
+		// pass the data structure to the Flash window
+		setTimeout(function() {
+			console.log('posting message to Flash');
+			this.winFlash.postMessage(window.data, '*', null);
+		}, 200);
 	},
 }
 
 window.addEventListener('load', function(evt) {
 	// set up keyboard
-	keyboard = new Keyboard();
-	keyboard.setLanguage('sa');
+	voyc.keyboard = new voyc.Keyboard();
+	voyc.keyboard.setLanguage('sa');
 
 	// attach leftnav menu
-	$('showtypewriter').addEventListener('click', function(evt) {
-		keyboard.setConfig('mode', 'typewriter');
+	voyc.$('showtypewriter').addEventListener('click', function(evt) {
+		voyc.keyboard.setConfig('mode', 'typewriter');
 	}, false);
-	$('showanalytics').addEventListener('click', function(evt) {
-		keyboard.setConfig('mode', 'learning');
+	voyc.$('showanalytics').addEventListener('click', function(evt) {
+		voyc.keyboard.setConfig('mode', 'learning');
 	}, false);
-	$('showtranslit').addEventListener('click', function(evt) {
-		keyboard.setConfig('showtranslit', (evt.currentTarget.checked ? 'on' : 'off'));
+	voyc.$('showtranslit').addEventListener('click', function(evt) {
+		voyc.keyboard.setConfig('showtranslit', (evt.currentTarget.checked ? 'on' : 'off'));
 	}, false);
 }, false);
 
-onAlphabetLoaded = function() {
+window['voyc']['onAlphabetLoaded'] = function(alphabet) {
+	(new voyc.Keyboard).alphabet = alphabet;
 	console.log('alphabet loaded');
-	keyboard.setup($('content'));
+	voyc.keyboard.setup(voyc.$('content'));
 }
 
 
-/*
-// this will make a call to a separate application
-bahasa.practice = function(event) {
-	var selector = '.key.selected';
-	var ra = document.querySelectorAll(selector);
-	var cards = [];
-	var r,o;
-	for (var i=0; i<ra.length; i++) {
-		r = ra[i];
-		o = {
-			i:parseInt(r.getAttribute('u')),
-			n:i,
-			q:r.querySelector('div:nth-child(1)').innerHTML,
-			t:r.querySelector('div:nth-child(2)').innerHTML,
-			a:r.querySelector('div:nth-child(2)').innerHTML,
-		};
-		cards.push(o);
+/**
+	Utilities for accessing the alphabet
+**/
+
+voyc.Keyboard.prototype.getUnicodeFromChar = function(c) {
+	return c.charCodeAt(0)
+}
+
+voyc.Keyboard.prototype.getCharFromUnicode = function(u) {
+	return String.fromCharCode(u);
+}
+
+voyc.Keyboard.prototype.getBufferFromString = function(s) {
+	var b = s.split(''); 
+	for (var i=0; i<b.length; i++) {
+		b[i] = this.getUnicodeFromChar(b[i]);
 	}
-	var name = 'Sanskrit';		
-	var dir = 'qa';
-	flash.program.loadData(name, dir, cards);
-	flash.minimal.expand($('deskexpander'), $('deskcontainer'))
-};
-*/
+	return b;
+}
+
+voyc.Keyboard.prototype.getStringFromBuffer = function(b) {
+	var a = [];
+	for (var i=0; i<b.length; i++) {
+		a[i] = this.getCharFromUnicode(b[i]);
+	}
+	return a.join('');
+}
+
+voyc.Keyboard.prototype.bufferContainsSpace = function(b) {
+	var r = false;
+	for (var i=0; i<b.length; i++) {
+		if (this.alphabet['alphabet'][b[i]].n == 'space') {
+			r = true;
+			break;
+		}
+	}
+	return r;
+}
+
+voyc.Keyboard.prototype.getTranslitFromBuffer = function(b) {
+	var comma = ',';
+	var hyphen = '-';
+	var tbt = '';
+	var u, a;  // current character
+	var un, an; // next character
+	var up, ap; // previous character
+	var hasSpace = this.bufferContainsSpace(b);
+	for (var i=0; i<b.length; i++) {
+		u = b[i];
+		a = this.alphabet['alphabet'][u];  // current character
+		un = (i<b.length-1) ? b[i+1] : null;
+		an = this.alphabet['alphabet'][un];  // next character
+
+		// if current char is letter, and prev char is not space, this is beginning of syllable
+		tween = ((a['b'] == 'l' && ap && ap['b'] != ' '));
+
+		// translit: 
+		//    1. hypens between syllables, 
+		//    2. add 'a' to consonants with no following vowel diacritic
+		if (tween && !hasSpace) {  //} && this.config.translitUsingHypens) {
+			tbt += hyphen;
+		}
+		tbt += a.t;
+		//tbt += (a.p == 'c' && (!an || an.p != 'a')) ? 'a' : '';
+		if ((a['p'] == 'c' && a['b'] == 'l') && (!an || !(an['p'] == 'v' && an['b'] == 'd'))) {
+			tbt += 'a';
+		}
+
+		up = u;
+		ap = this.alphabet['alphabet'][up];  // previous character 
+	}
+	return tbt;
+}
+
+voyc.Keyboard.prototype.getTranslitFromString = function(s) {
+	var b = this.getBufferFromString(s);
+	var t = this.getTranslitFromBuffer(b);
+	return t;
+}
 
