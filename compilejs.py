@@ -14,7 +14,6 @@ arr = [
 	('code_url', url + 'icon/lib/menu.js'),
 	('code_url', url + 'jslib/utils.js'),
 	('code_url', url + 'jslib/dragger.js'),
-	('code_url', url + 'jslib/voyclogo.js'),
 	('code_url', url + 'keyboard.js'),
 	('compilation_level', 'ADVANCED_OPTIMIZATIONS'),
 	('language', 'ECMASCRIPT5'),
