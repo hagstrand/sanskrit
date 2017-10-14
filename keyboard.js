@@ -11,7 +11,6 @@ voyc.Keyboard = function() {
 	this.buffer = [];  // array of keys to the alphabet table
 	this.typing = true;
 	this.alphabet = {};  // table will be loaded dynamically from ./alphabet/sa.js file
-	this.winFlash = null;
 }
 
 voyc.Keyboard.configdefault = {	
@@ -511,11 +510,11 @@ voyc.Keyboard.prototype = {
 			for (var i=0; i<ra.length; i++) {
 				r = ra[i];
 				o = {
-					i:parseInt(r.getAttribute('u'),10),
-					n:i+1,
-					q:r.querySelector('div:nth-child(1)').innerHTML,
-					t:r.querySelector('div:nth-child(1)').innerHTML,
-					a:r.querySelector('div:nth-child(2)').innerHTML,
+					'i':parseInt(r.getAttribute('u'),10),
+					'n':i+1,
+					'q':r.querySelector('div:nth-child(1)').innerHTML,
+					't':r.querySelector('div:nth-child(1)').innerHTML,
+					'a':r.querySelector('div:nth-child(2)').innerHTML,
 				};
 				cards.push(o);
 			}
@@ -526,28 +525,30 @@ voyc.Keyboard.prototype = {
 				r = this.alphabet['alphabet'][key];
 				if (r['t'] && r['t'] != ' ') {
 					o = {
-						i:r['i'],
-						n:seq++,
-						q:r['s'],
-						t:r['t'],
-						a:r['t'],
+						'i':r['i'],
+						'n':seq++,
+						'q':r['s'],
+						't':r['t'],
+						'a':r['t'],
 					};
 					cards.push(o);
 				}
 			}
 		}
 		
-		// build data structure including array of cards
+		/** 
+			This block of data is passed to Flash.
+		*/ 
 		window.data = {
-			name: 'Sanskrit Alphabet',
-			reversible:true,
-			language:true,
-			sketch:true,
-			translit:false,
-			audio:false,
-			db: false,
-			hm: false, // show translit with question or answer
-			cards: cards,
+			'name': 'Sanskrit Alphabet',
+			'reversible':true,
+			'language':true,
+			'sketch':true,
+			'translit':false,
+			'audio':false,
+			'db': false,
+			'hm': false, // show translit with question or answer
+			'cards': cards,
 		}
 
 		// open the Flash window
@@ -555,19 +556,19 @@ voyc.Keyboard.prototype = {
 		if (window.location.href.indexOf('file:') > -1) {
 			url = '../flash/index.html'; // local testing
 		}
-		if (this.winFlash && !this.winFlash.closed) {
+		if (window.winFlash && !window.winFlash.closed) {
 			console.log('Flash already open');
-			this.winFlash.focus();
+			window.winFlash.focus();
 		}
 		else {
 			console.log('opening Flash');
-			this.winFlash = window.open(url, 'flash');
+			window.winFlash = window.open(url, 'flash');
 		}
 		
 		// pass the data structure to the Flash window
 		setTimeout(function() {
 			console.log('posting message to Flash');
-			this.winFlash.postMessage(window.data, '*', null);
+			window.winFlash.postMessage(window.data, '*');
 		}, 200);
 	},
 }
