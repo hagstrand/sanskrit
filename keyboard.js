@@ -11,6 +11,7 @@ voyc.Keyboard = function() {
 	this.buffer = [];  // array of keys to the alphabet table
 	this.typing = true;
 	this.alphabet = {};  // table will be loaded dynamically from ./alphabet/sa.js file
+	this.post = new voyc.Post('flash','http://flash.voyc.com','../flash/index.html');
 }
 
 voyc.Keyboard.configdefault = {	
@@ -539,7 +540,7 @@ voyc.Keyboard.prototype = {
 		/** 
 			This block of data is passed to Flash.
 		*/ 
-		window.data = {
+		var data = {
 			'name': 'Sanskrit Alphabet',
 			'reversible':true,
 			'language':true,
@@ -552,26 +553,7 @@ voyc.Keyboard.prototype = {
 		}
 
 		// open the Flash window
-		var browserTimeToOpen = 100;
-		var url = 'http://flash.voyc.com';
-		if (window.location.href.indexOf('file:') > -1) {
-			url = '../flash/index.html'; // local testing
-		}
-		if (window.winFlash && !window.winFlash.closed) {
-			console.log('Flash already open');
-			window.winFlash.focus();
-		}
-		else {
-			console.log('opening Flash');
-			browserTimeToOpen = 1000;
-			window.winFlash = window.open(url, 'flash');
-		}
-		
-		// pass the data structure to the Flash window
-		setTimeout(function() {
-			console.log('posting message to Flash');
-			window.winFlash.postMessage(window.data, '*');
-		}, browserTimeToOpen);
+		this.post.post(data);
 	},
 }
 
