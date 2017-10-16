@@ -541,7 +541,8 @@ voyc.Keyboard.prototype = {
 			This block of data is passed to Flash.
 		*/ 
 		var data = {
-			'name': 'Sanskrit Alphabet',
+			'name': 'practice',
+			'title': 'Sanskrit Alphabet',
 			'reversible':true,
 			'language':true,
 			'sketch':true,
