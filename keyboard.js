@@ -552,6 +552,7 @@ voyc.Keyboard.prototype = {
 		}
 
 		// open the Flash window
+		var browserTimeToOpen = 100;
 		var url = 'http://flash.voyc.com';
 		if (window.location.href.indexOf('file:') > -1) {
 			url = '../flash/index.html'; // local testing
@@ -562,6 +563,7 @@ voyc.Keyboard.prototype = {
 		}
 		else {
 			console.log('opening Flash');
+			browserTimeToOpen = 1000;
 			window.winFlash = window.open(url, 'flash');
 		}
 		
@@ -569,7 +571,7 @@ voyc.Keyboard.prototype = {
 		setTimeout(function() {
 			console.log('posting message to Flash');
 			window.winFlash.postMessage(window.data, '*');
-		}, 200);
+		}, browserTimeToOpen);
 	},
 }
 
